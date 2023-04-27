@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Flying Through Space</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: black;
+            overflow: hidden;
+        }
+
+        canvas {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+<canvas id="myCanvas"></canvas>
+<script>
+    // Set up the canvas
+    var canvas = document.getElementById("myCanvas");
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+    var ctx = canvas.getContext("2d");
+
+    // Create an array to hold the stars
+    var stars = [];
+    var numStars = 300;
+    for (var i = 0; i < numStars; i++) {
+        stars.push({
+            x: Math.random() * canvas.width - canvas.width / 2,
+            y: Math.random() * canvas.height - canvas.height / 2,
+            z: Math.random() * canvas.width,
+            radius: Math.random() * 0.5,
+            alpha: Math.random() * 0.5 + 0.5
+        });
+    }
+
+    // Define the speed increment for stars
+    var speedIncrement = 0.1;
+
+    // Variable to keep track of whether left mouse button is pressed
+    var isMouseDown = false;
+
+    // Add event listener for mouse down events
+    canvas.addEventListener("mousedown", function(event) {
+        isMouseDown = true;
+    });
+
+    // Add event listener for mouse up events
+    canvas.addEventListener("mouseup", function(event) {
+        isMouseDown = false;
+    });
+
+    // Draw the stars and animate them
+    function draw() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        for (var i = 0; i < numStars; i++) {
+            var star = stars[i];
+
+            // Calculate the star's position in 3D space
+            var x = star.x * (canvas.width / star.z) + canvas.width / 2;
+            var y = star.y * (canvas.width / star.z) + canvas.height / 2;
+            var radius = star.radius * (canvas.width / star.z);
+
+            // Draw the star
+            ctx.beginPath();
+            ctx.arc(x, y, radius, 0, 2 * Math.PI);
+            ctx.fillStyle = "rgba(255, 255, 255, " + star.alpha + ")";
+            ctx.fill();
+
+            // Move the star towards the viewer with updated speed increment
+            if (isMouseDown) {
+                speedIncrement += 0.001; // Increase the speed increment more slowly when mouse is down (50% slower)
+                if (speedIncrement > 20) {
+                    speedIncrement = 20; // Limit the speed increment to a maximum of 20
+                }
+            } else {
+                speedIncrement -= 0.01; // Decrease the speed increment when mouse is up
+                if (speedIncrement < 0) {
+                    speedIncrement = 0; // Clamp speed increment to minimum of 0
+                }
+            }
+            star.z -= (5 + speedIncrement);
+            if (star.z <= 0) {
+                star.z = canvas.width;
+            }
+        }
+        requestAnimationFrame(draw);
+    }
+
+    draw();
+
+    // Add event listener for window resize
+    window.addEventListener("resize", function() {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+        draw();
+    });
+
+</script>
+</body>
+</html>
